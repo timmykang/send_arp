@@ -51,7 +51,6 @@ void send_pkt(uint8_t * d_mac, uint8_t * s_mac, uint8_t * f_mac, uint8_t * d_ip,
 	send = (uint8_t *)malloc(ether_len + arp_len);
 	memcpy(ether.ether_dhost, d_mac, 6);
 	memcpy(ether.ether_shost, s_mac, 6);
-	printf("%d %d\n", ether_len, arp_len);
 	ether.ether_type = static_cast<uint16_t>(0x0608);
   arp.arp_hrd = static_cast<uint16_t>(0x0100);
 	arp.arp_pro = static_cast<uint16_t>(0x0008);
@@ -83,9 +82,7 @@ void get_sender_mac(uint8_t * my_mac, uint8_t * sender_mac, uint8_t * my_ip, uin
 		if (res == 0) continue;
 		if (res == -1 || res == -2) break;
 		ethernet = (struct ether_header *)(packet);
-		printf("%u\n",ethernet -> ether_type);
 		if ((memcmp(ethernet -> ether_dhost, my_mac, 6) == 0) && (ethernet -> ether_type == static_cast<uint16_t>(0x0608))) {
-			printf("11\n");
 			memcpy(sender_mac, ethernet -> ether_shost, 6);
 			break;
 		}
@@ -121,5 +118,5 @@ int main(int argc, char * argv[]) {
 	get_my_ip(my_ip, interface);
 	get_my_mac(my_mac, interface);
 	get_sender_mac(my_mac, sender_mac, my_ip, sender_ip, fp);
-	send_pkt(sender_mac, my_mac, sender_mac, sender_ip, target_ip, static_cast<uint16_t>(0x0002), fp);
+	send_pkt(sender_mac, my_mac, sender_mac, sender_ip, target_ip, static_cast<uint16_t>(0x0200), fp);
 }
