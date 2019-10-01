@@ -82,7 +82,7 @@ void get_sender_mac(uint8_t * my_mac, uint8_t * sender_mac, uint8_t * my_ip, uin
 		if (res == 0) continue;
 		if (res == -1 || res == -2) break;
 		ethernet = (struct ether_header *)(packet);
-		if (memcmp(ethernet -> ether_dhost, my_mac, 6) == 0) {
+		if ((memcmp(ethernet -> ether_dhost, my_mac, 6) == 0) && (ethernet -> ether_type == static_cast<uint16_t>(0x0806))) {
 			memcpy(sender_mac, ethernet -> ether_shost, 6);
 			break;
 		}
