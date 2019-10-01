@@ -51,9 +51,10 @@ void send_pkt(uint8_t * d_mac, uint8_t * s_mac, uint8_t * f_mac, uint8_t * d_ip,
 	send = (uint8_t *)malloc(ether_len + arp_len);
 	memcpy(ether.ether_dhost, d_mac, 6);
 	memcpy(ether.ether_shost, s_mac, 6);
-	ether.ether_type = static_cast<uint16_t>(0x0806);
-	arp.arp_hrd = static_cast<uint16_t>(1);
-	arp.arp_pro = static_cast<uint16_t>(0x0800);
+	printf("%d %d\n", ether_len, arp_len);
+	ether.ether_type = static_cast<uint16_t>(0x0608);
+  arp.arp_hrd = static_cast<uint16_t>(0x0100);
+	arp.arp_pro = static_cast<uint16_t>(0x0008);
 	arp.arp_hln = static_cast<uint8_t>(6);
 	arp.arp_pln = static_cast<uint8_t>(4);
 	arp.arp_op = arp_operand;
@@ -63,7 +64,7 @@ void send_pkt(uint8_t * d_mac, uint8_t * s_mac, uint8_t * f_mac, uint8_t * d_ip,
 	memcpy(arp.arp_tpa, d_ip, 4);
 	memcpy(send, &ether, ether_len);
 	memcpy(send + ether_len, &arp, arp_len);
-	if (pcap_sendpacket(fp, send, arp_len) != 0) {
+	if (pcap_sendpacket(fp, send, arp_len + ether_len) != 0) {
 		printf("ERROR2\n");
 		exit(1);
 	}
@@ -76,13 +77,15 @@ void get_sender_mac(uint8_t * my_mac, uint8_t * sender_mac, uint8_t * my_ip, uin
 	const u_char * packet;
 	uint8_t tmp_mac[6] = {static_cast<uint8_t>(0xff), static_cast<uint8_t>(0xff), static_cast<uint8_t>(0xff), static_cast<uint8_t>(0xff), static_cast<uint8_t>(0xff), static_cast<uint8_t>(0xff)};
 	uint8_t tmp1_mac[6] = {0};
-	send_pkt(tmp_mac, my_mac, tmp1_mac, sender_ip, my_ip, static_cast<uint8_t>(0x0001), fp);
+	send_pkt(tmp_mac, my_mac, tmp1_mac, sender_ip, my_ip, static_cast<uint16_t>(0x0100), fp);
 	while (true) {
 		int i, res = pcap_next_ex(fp, &header, &packet);
 		if (res == 0) continue;
 		if (res == -1 || res == -2) break;
 		ethernet = (struct ether_header *)(packet);
-		if ((memcmp(ethernet -> ether_dhost, my_mac, 6) == 0) && (ethernet -> ether_type == static_cast<uint16_t>(0x0806))) {
+		printf("%u\n",ethernet -> ether_type);
+		if ((memcmp(ethernet -> ether_dhost, my_mac, 6) == 0) && (ethernet -> ether_type == static_cast<uint16_t>(0x0608))) {
+			printf("11\n");
 			memcpy(sender_mac, ethernet -> ether_shost, 6);
 			break;
 		}
