@@ -17,15 +17,15 @@ struct ether_header {
 };
 
 struct arp_header {
-		uint16_t arp_hrd = 1;
-		uint16_t arp_pro = 0x0800;
-		uint8_t arp_hln = 6;
-		uint8_t arp_pln = 4;
-		uint16_t arp_op;
-		uint8_t arp_sha[6];
-		uint8_t arp_spa[4];
-		uint8_t arp_tha[6];
-		uint8_t arp_tpa[4];
+	uint16_t arp_hrd;
+	uint16_t arp_pro;
+	uint8_t arp_hln;
+	uint8_t arp_pln;
+	uint16_t arp_op;
+	uint8_t arp_sha[6];
+	uint8_t arp_spa[4];
+	uint8_t arp_tha[6];
+	uint8_t arp_tpa[4];
 };
 
 void get_my_ip(uint8_t * my_ip, char * interface);

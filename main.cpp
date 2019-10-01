@@ -43,22 +43,26 @@ void get_my_mac(uint8_t * my_mac, char * interface) {
 }
 
 void send_pkt(uint8_t * d_mac, uint8_t * s_mac, uint8_t * f_mac, uint8_t * d_ip, uint8_t * s_ip, uint16_t arp_operand, pcap_t *fp) {
-	ether_header * ether;
-	arp_header * arp;
+	ether_header ether;
+	arp_header arp;
 	int ether_len = sizeof(struct ether_header);
 	int arp_len = sizeof(struct arp_header);
 	uint8_t * send = NULL;
 	send = (uint8_t *)malloc(ether_len + arp_len);
-	memcpy(ether -> ether_dhost, d_mac, 6);
-	memcpy(ether -> ether_shost, s_mac, 6);
-	ether -> ether_type = 0x0806;
-	arp -> arp_op = arp_operand;
-	memcpy(arp -> arp_sha, s_mac, 6);
-	memcpy(arp -> arp_spa, s_ip, 4);
-	memcpy(arp -> arp_tha, f_mac, 6);
-	memcpy(arp -> arp_tpa, d_ip, 4);
-	memcpy(send, ether, ether_len);
-	memcpy(send + ether_len, arp, arp_len);
+	memcpy(ether.ether_dhost, d_mac, 6);
+	memcpy(ether.ether_shost, s_mac, 6);
+	ether.ether_type = static_cast<uint16_t>(0x0806);
+	arp.arp_hrd = static_cast<uint16_t>(1);
+	arp.arp_pro = static_cast<uint16_t>(0x0800);
+	arp.arp_hln = static_cast<uint8_t>(6);
+	arp.arp_pln = static_cast<uint8_t>(4);
+	arp.arp_op = arp_operand;
+	memcpy(arp.arp_sha, s_mac, 6);
+	memcpy(arp.arp_spa, s_ip, 4);
+	memcpy(arp.arp_tha, f_mac, 6);
+	memcpy(arp.arp_tpa, d_ip, 4);
+	memcpy(send, &ether, ether_len);
+	memcpy(send + ether_len, &arp, arp_len);
 	if (pcap_sendpacket(fp, send, arp_len) != 0) {
 		printf("ERROR2\n");
 		exit(1);
@@ -70,9 +74,9 @@ void get_sender_mac(uint8_t * my_mac, uint8_t * sender_mac, uint8_t * my_ip, uin
 	struct ether_header * ethernet;
 	struct arp_header * arp;
 	const u_char * packet;
-	uint8_t tmp_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+	uint8_t tmp_mac[6] = {static_cast<uint8_t>(0xff), static_cast<uint8_t>(0xff), static_cast<uint8_t>(0xff), static_cast<uint8_t>(0xff), static_cast<uint8_t>(0xff), static_cast<uint8_t>(0xff)};
 	uint8_t tmp1_mac[6] = {0};
-	send_pkt(tmp_mac, my_mac, tmp1_mac, sender_ip, my_ip, 0x0001, fp);
+	send_pkt(tmp_mac, my_mac, tmp1_mac, sender_ip, my_ip, static_cast<uint8_t>(0x0001), fp);
 	while (true) {
 		int i, res = pcap_next_ex(fp, &header, &packet);
 		if (res == 0) continue;
@@ -114,5 +118,5 @@ int main(int argc, char * argv[]) {
 	get_my_ip(my_ip, interface);
 	get_my_mac(my_mac, interface);
 	get_sender_mac(my_mac, sender_mac, my_ip, sender_ip, fp);
-	send_pkt(sender_mac, my_mac, sender_mac, sender_ip, target_ip, 0x0002, fp);
+	send_pkt(sender_mac, my_mac, sender_mac, sender_ip, target_ip, static_cast<uint16_t>(0x0002), fp);
 }
